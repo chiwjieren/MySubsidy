@@ -1,98 +1,136 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { Link, useRouter } from 'expo-router';
+import { useSubsidy } from '@/context/SubsidyContext';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function Dashboard() {
+  const router = useRouter();
+  const { totalBalance, subsidies, logout } = useSubsidy();
 
-export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="flex-1 px-5 pt-2" showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View className="flex-row justify-between items-center mb-6">
+            <TouchableOpacity className="w-10 h-10 border border-gray-200 rounded-xl items-center justify-center bg-white">
+                <Ionicons name="grid-outline" size={20} color="black" />
+            </TouchableOpacity>
+            
+            <View className="flex-row items-center gap-2">
+                 <Ionicons name="wallet" size={24} color="#5b50e6" />
+                 <Text className="text-xl font-bold text-[#5b50e6] tracking-tight">MySubsidy</Text>
+            </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+            <TouchableOpacity className="w-10 h-10 border border-gray-200 rounded-xl items-center justify-center bg-white" onPress={() => {
+                 if (Platform.OS === 'web') {
+                    if (window.confirm("Are you sure you want to logout?")) {
+                        logout();
+                        // Navigation is handled automatically by RootLayout
+                    }
+                 } else {
+                     Alert.alert("Logout", "Are you sure?", [
+                        { text: "Cancel" },
+                        { text: "Logout", style: 'destructive', onPress: () => { logout(); } }
+                     ]);
+                 }
+            }}>
+                <Ionicons name="log-out-outline" size={22} color="black" />
+            </TouchableOpacity>
+        </View>
+
+        {/* Greeting & Search */}
+        <Text className="text-gray-500 font-medium mb-1">Good Morning,</Text>
+        <Text className="text-3xl font-bold text-gray-900 mb-6">Ian Jie Shan</Text>
+
+        <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 mb-8">
+            <Ionicons name="search-outline" size={20} color="gray" />
+            <Text className="text-gray-400 ml-3 flex-1">Search subsidies...</Text>
+            <Ionicons name="mic-outline" size={20} color="gray" />
+        </View>
+
+        {/* Hero Card (Lime Green Style) */}
+        <View className="bg-[#Dbf26e] rounded-3xl p-6 mb-8 relative overflow-hidden">
+            {/* Background Decor */}
+             <View className="absolute -right-5 top-10 w-32 h-32 bg-[#cbea4a] rounded-full opacity-50" />
+
+            <Text className="text-gray-800 font-bold text-lg max-w-[70%] mb-2">Total Subsidy Balance</Text>
+            <Text className="text-gray-400 text-xs font-medium mb-4 uppercase tracking-wider">Available Funds</Text>
+            
+            <Text className="text-4xl font-extrabold text-gray-900 mb-4">RM {totalBalance.toFixed(2)}</Text>
+
+            <View className="flex-row items-center">
+                <View className="bg-[#5b50e6] px-3 py-1.5 rounded-full mr-3">
+                     <Text className="text-white text-xs font-bold">Active</Text>
+                </View>
+                <Text className="text-gray-800 font-medium text-sm">{subsidies.filter(s => s.status === 'claimed').length} Programs Enrolled</Text>
+            </View>
+            
+            {/* Illustration Placeholder (Books/Coins) */}
+            <View className="absolute bottom-4 right-4 opacity-10">
+                <Ionicons name="wallet" size={80} color="black" />
+            </View>
+        </View>
+
+        {/* Quick Actions (Pills) */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-8 flex-row pb-2">
+             <Link href="/spending" asChild>
+                <TouchableOpacity className="bg-[#5b50e6] px-6 py-3 rounded-full mr-3 shadow-sm shadow-indigo-200">
+                    <Text className="text-white font-bold">Scan & Pay</Text>
+                </TouchableOpacity>
+             </Link>
+             
+             <Link href="/claim" asChild>
+                <TouchableOpacity className="bg-white border border-gray-200 px-6 py-3 rounded-full mr-3">
+                    <Text className="text-gray-600 font-bold">Claims</Text>
+                </TouchableOpacity>
+             </Link>
+
+             <TouchableOpacity className="bg-white border border-gray-200 px-6 py-3 rounded-full mr-3">
+                 <Text className="text-gray-600 font-bold">History</Text>
+             </TouchableOpacity>
+
+             <TouchableOpacity className="bg-white border border-gray-200 px-6 py-3 rounded-full mr-3">
+                 <Text className="text-gray-600 font-bold">Profile</Text>
+             </TouchableOpacity>
+        </ScrollView>
+
+        {/* Categories / List (Sociology Card Style) */}
+        <View className="flex-row justify-between items-center mb-4">
+             <Text className="text-xl font-bold text-gray-900">Your Subsidies</Text>
+             <TouchableOpacity>
+                 <Ionicons name="options-outline" size={24} color="gray" />
+             </TouchableOpacity>
+        </View>
+
+        <View className="gap-4 mb-20">
+             {subsidies.map((item) => (
+                 <View key={item.id} className="bg-[#eff0f6] p-4 rounded-3xl flex-row items-center">
+                     <View className={`w-12 h-12 ${item.color.replace('bg-', 'bg-opacity-20 bg-')} rounded-full items-center justify-center mr-4`}>
+                         <Ionicons 
+                            name={item.id === 'bkk' ? 'people' : item.id === 'mykasih' ? 'fast-food' : 'book'} 
+                            size={24} 
+                            color="#5b50e6" 
+                         />
+                     </View>
+                     <View className="flex-1">
+                         <Text className="font-bold text-gray-900 text-lg">{item.name}</Text>
+                         <Text className="text-gray-500 text-sm">{item.description}</Text>
+                     </View>
+                     <View className="items-end">
+                          <View className={`px-2 py-1 rounded-md mb-1 ${item.status === 'claimed' ? 'bg-green-100' : 'bg-gray-200'}`}>
+                               <Text className={`text-xs font-bold ${item.status === 'claimed' ? 'text-green-700' : 'text-gray-500'}`}>
+                                   {item.status === 'claimed' ? 'Active' : 'Not Claimed'}
+                               </Text>
+                          </View>
+                          <Text className="text-gray-900 font-bold">RM {(item.amount - (item.spent || 0)).toFixed(0)}</Text>
+                     </View>
+                 </View>
+             ))}
+        </View>
+
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});

@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NFCReaderUsageDescription": "We need to use NFC to scan your MyKad for identity verification."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +22,12 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.NFC",
+        "android.permission.NFC"
+      ],
+      "package": "com.anonymous.mySubsidy"
     },
     "web": {
       "output": "static",
@@ -27,6 +35,7 @@
     },
     "plugins": [
       "expo-router",
+      "react-native-nfc-manager",
       [
         "expo-splash-screen",
         {
