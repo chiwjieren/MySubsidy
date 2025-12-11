@@ -28,13 +28,23 @@ contract Vendor {
         name = _name;
     }
 
-    function allowSubsidy(address subsidy) external onlyGovernment {
+    function allowSubsidy(address subsidy) public onlyGovernment {
+        require(!allowedSubsidies[subsidy], "Subsidy already allowed");
         allowedSubsidies[subsidy] = true;
-        // append to subsidies array later
+        subsidies.push(subsidy);
     }
 
-    function disallowSubsidy(address subsidy) external onlyGovernment {
+    function disallowSubsidy(address subsidy) public onlyGovernment {
+        require(allowedSubsidies[subsidy], "Subsidy not allowed");
         allowedSubsidies[subsidy] = false;
+
+        for (uint i = 0; i < subsidies.length; i++) {
+            if (subsidies[i] == subsidy) {
+                subsidies[i] = subsidies[subsidies.length - 1];
+                subsidies.pop();
+                break;
+            }
+        }
     }
 
     function checkAllowedSubsidy(address subsidy) public view returns (bool) {
@@ -83,8 +93,10 @@ contract Vendor {
         balance += amount;
     }
 
-    // function cashOut(uint256) external onlyGovernment() {
-
-    // }
+    function resetBalance() public onlyGovernment returns (uint256) {
+        uint256 b = balance;
+        balance = 0;
+        return b;
+    }
     // #endregion
 }

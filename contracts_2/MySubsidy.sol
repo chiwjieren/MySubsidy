@@ -3,6 +3,7 @@ pragma solidity ^0.8.30;
 
 import "./User.sol";
 import "./Vendor.sol";
+import "./MockMYRc.sol";
 
 contract MySubsidy {
     // user
@@ -16,6 +17,7 @@ contract MySubsidy {
     //      register
 
     address government;
+    MockMYRc myrc;
 
     mapping(string => address) userICMapping;
     mapping(address => bool) userExists;
@@ -25,8 +27,9 @@ contract MySubsidy {
     Vendor[] public vendors;
     Subsidy[] public subsidies;
 
-    constructor() {
+    constructor(address _myrc) {
         government = msg.sender;
+        myrc = MockMYRc(_myrc);
     }
 
     modifier onlyGovernment() {
@@ -52,6 +55,13 @@ contract MySubsidy {
         vendorExists[address(vendor)] = true;
     }
 
+    function allowSubsidy(address subsidy, address vendorAddress) external onlyGovernment {
+        require(vendorExists[vendorAddress], "Vendor does not exist");
+        Vendor vendor = Vendor(vendorAddress);
+
+        vendor.allowSubsidy(subsidy);
+    }
+
     // #region payment
     function pay(
         address vendorAddress,
@@ -67,6 +77,16 @@ contract MySubsidy {
 
         user.consumeSubsidy(subsidyAddress, amount);
         vendor.receiveFunds(subsidyAddress, amount);
+    }
+
+    function cashOut(
+        address vendorAddress
+    ) external onlyGovernment {
+        // mints X MYRc on vendor's address
+        require(vendorExists[vendorAddress], "Vendor does not exist");
+        Vendor vendor = Vendor(vendorAddress);
+        uint256 amount = vendor.resetBalance();
+        myrc.mint(vendorAddress, amount);
     }
     // #endregion
 
